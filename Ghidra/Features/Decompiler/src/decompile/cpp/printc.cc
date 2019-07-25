@@ -51,7 +51,7 @@ OpToken PrintC::boolean_and = { "&&", 2, 22, false, OpToken::binary, 1, 0, (OpTo
 OpToken PrintC::boolean_xor = { "^^", 2, 20, false, OpToken::binary, 1, 0, (OpToken *)0 };
 OpToken PrintC::boolean_or = { "||", 2, 18, false, OpToken::binary, 1, 0, (OpToken *)0 };
 OpToken PrintC::assignment = { "=", 2, 14, false, OpToken::binary, 1, 5, (OpToken *)0 };
-OpToken PrintC::comma = { ",", 2, 2, true, OpToken::binary, 0, 0, (OpToken *)0 };
+OpToken PrintC::comma = { ", ", 2, 2, true, OpToken::binary, 0, 0, (OpToken *)0 };
 OpToken PrintC::new_op = { "", 2, 62, false, OpToken::space, 1, 0, (OpToken *)0 };
 
 // Inplace assignment operators
