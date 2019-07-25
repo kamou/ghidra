@@ -100,6 +100,10 @@ PrintC::PrintC(Architecture *g,const string &nm) : PrintLanguage(g,nm)
   option_nocasts = false;
   option_unplaced = false;
   option_hide_exts = true;
+  option_space_after_comma = false;
+  option_newline_before_else = true;
+  option_newline_before_opening_brace = false;
+  option_newline_after_prototype = true;
   nullToken = "NULL";
   
   // Set the flip tokens
@@ -296,8 +300,9 @@ void PrintC::opFunc(const PcodeOp *op)
   string nm = op->getOpcode()->getOperatorName(op);
   pushAtom(Atom(nm,optoken,EmitXml::no_color,op));
   if (op->numInput() > 0) {
-    for(int4 i=0;i<op->numInput()-1;++i)
-      pushOp(&comma,op);
+    for(int4 i=0;i<op->numInput()-1;++i) {
+		pushOp(&comma,op);
+    }
   // implied vn's pushed on in reverse order for efficiency
   // see PrintLanguage::pushVnImplied
     for(int4 i=op->numInput()-1;i>=0;--i)
@@ -1773,6 +1778,9 @@ void PrintC::emitStructDefinition(const TypeStruct *ct)
     iter++;
     if (iter != ct->endField()) {
       emit->print(","); // Print comma separator
+      if (option_space_after_comma) {
+      	emit->spaces(1);
+      }
       emit->tagLine();
     }
   }
@@ -1866,8 +1874,12 @@ void PrintC::emitPrototypeInputs(const FuncProto *proto)
     emit->print("void",EmitXml::keyword_color);
   else {
     for(int4 i=0;i<sz;++i) {
-      if (i!=0)
-	emit->print(",");
+      if (i!=0) {
+		  emit->print(",");
+		  if (option_space_after_comma) {
+			  emit->spaces(1);
+		  }
+      }
       ProtoParameter *param = proto->getParam(i);
       Symbol *sym = param->getSymbol();
       if (sym != (Symbol *)0)
@@ -1882,8 +1894,12 @@ void PrintC::emitPrototypeInputs(const FuncProto *proto)
     }
   }
   if (proto->isDotdotdot()) {
-    if (sz != 0)
-      emit->print(",");
+    if (sz != 0) {
+		emit->print(",");
+		if (option_space_after_comma) {
+			emit->spaces(1);
+		}
+	}
     emit->print("...");
   }
 }
@@ -2277,7 +2293,9 @@ void PrintC::docFunction(const Funcdata *fd)
     emit->tagLine();
     emitFunctionDeclaration(fd);
     emit->tagLine();
-    emit->tagLine();
+    if (option_newline_after_prototype) {
+      emit->tagLine();
+    }
     int4 id = emit->startIndent();
     emit->print("{");
     emitLocalVarDecls(fd);
@@ -2529,7 +2547,11 @@ void PrintC::emitBlockIf(const BlockIf *bl)
   }
   
   setMod(no_branch);
-  emit->spaces(1);
+  if (!option_newline_before_opening_brace) {
+	emit->spaces(1);
+  } else {
+  	emit->tagLine();
+  }
   int4 id = emit->startIndent();
   emit->print("{");
   int4 id1 = emit->beginBlock(bl->getBlock(1));
@@ -2539,9 +2561,15 @@ void PrintC::emitBlockIf(const BlockIf *bl)
   emit->tagLine();
   emit->print("}");
   if (bl->getSize()==3) {
-    emit->tagLine();
+  	if (option_newline_before_else) {
+		emit->tagLine();
+  	}
     emit->print("else",EmitXml::keyword_color);
-    emit->spaces(1);
+    if (option_newline_before_else) {
+	  emit->tagLine();
+    } else {
+	  emit->spaces(1);
+    }
     int4 id = emit->startIndent();
     emit->print("{");
     int4 id2 = emit->beginBlock(bl->getBlock(2));
@@ -2629,7 +2657,11 @@ void PrintC::emitBlockDoWhile(const BlockDoWhile *bl)
   emitAnyLabelStatement(bl);
   emit->tagLine();
   emit->print("do",EmitXml::keyword_color);
-  emit->spaces(1);
+  if (option_newline_before_opening_brace) {
+  	emit->tagLine();
+  } else {
+	emit->spaces(1);
+  }
   int4 id = emit->startIndent();
   emit->print("{");
   pushMod();
@@ -2661,7 +2693,11 @@ void PrintC::emitBlockInfLoop(const BlockInfLoop *bl)
   emitAnyLabelStatement(bl);
   emit->tagLine();
   emit->print("do",EmitXml::keyword_color);
-  emit->spaces(1);
+  if (option_newline_before_opening_brace) {
+  	emit->tagLine();
+  } else {
+	emit->spaces(1);
+  }
   int4 id = emit->startIndent();
   emit->print("{");
   int4 id1 = emit->beginBlock(bl->getBlock(0));
