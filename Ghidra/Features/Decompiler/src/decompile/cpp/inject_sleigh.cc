@@ -321,6 +321,9 @@ void PcodeInjectLibrarySleigh::parseInject(InjectPayload *payload)
     compiler.setUniqueBase(0x2000);	// Don't need to deconflict with anything other injects
     ExecutablePcodeSleigh *sleighpayload = (ExecutablePcodeSleigh *)payload;
     istringstream s(sleighpayload->parsestring);
+    string line;
+    while (getline(s, line))
+        line.erase(0, line.find_first_not_of(" \t\n\r\f\v"));
     if (!compiler.parseStream(s))
       throw LowlevelError(payload->getSource() + ": Unable to compile pcode: "+compiler.getErrorMessage());
     sleighpayload->tpl = compiler.releaseResult();
@@ -330,6 +333,9 @@ void PcodeInjectLibrarySleigh::parseInject(InjectPayload *payload)
     compiler.setUniqueBase(tempbase);
     InjectPayloadSleigh *sleighpayload = (InjectPayloadSleigh *)payload;
     istringstream s(sleighpayload->parsestring);
+    string line;
+    while (getline(s, line))
+        line.erase(0, line.find_first_not_of(" \t\n\r\f\v"));
     if (!compiler.parseStream(s))
       throw LowlevelError(payload->getSource() + ": Unable to compile pcode: "+compiler.getErrorMessage());
     tempbase = compiler.getUniqueBase();
